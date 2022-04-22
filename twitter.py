@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[16]:
 
 
 import pandas as pd
@@ -10,7 +10,7 @@ import plotly.express as px
 import streamlit as st
 
 
-# In[8]:
+# In[17]:
 
 
 
@@ -32,6 +32,7 @@ if page == 'Twitter Analysis':
                 log_x=True, size_max=80, color="Author Followers Count",  color_continuous_scale="sunset_r", hover_name="Author",
                 height=600)
 
+
   col1.plotly_chart(fig,use_container_width = True)
   fig = px.scatter(twitter[twitter['Author Verified'] == country], 
     x = "Number of Likes", y = "Number of Retweets",title = "Unverified Accounts")
@@ -40,18 +41,9 @@ if page == 'Twitter Analysis':
 
 else:
   ## IDP
-  contlist = df['continent'].unique()
- 
-  continent = st.selectbox("Select a continent:",contlist)
-  col1,col2 = st.columns(2)
-  fig = px.line(df[df['continent'] == continent], 
-    x = "year", y = "gdpPercap",
-    title = "GDP per Capita",color = 'country')
+  st.text('Under construction')
+
+
   
-  col1.plotly_chart(fig)
-  fig = px.line(df[df['continent'] == continent], 
-    x = "year", y = "pop",
-    title = "Population",color = 'country')
   
-  col2.plotly_chart(fig, use_container_width = True)
 
