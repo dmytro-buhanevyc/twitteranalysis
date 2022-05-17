@@ -180,7 +180,6 @@ def data_frame_demo():
     import tweepy
     import time
     from datetime import date, datetime
-    from pandas_profiling import ProfileReport
     from ipywidgets import interactive
     import inspect
     import textwrap
