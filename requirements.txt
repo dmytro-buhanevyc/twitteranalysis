@@ -12,3 +12,4 @@ geopy
 streamlit-folium
 geopandas
 pandas-profiling
+jinja2
