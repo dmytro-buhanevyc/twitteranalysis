@@ -188,7 +188,6 @@ def data_frame_demo():
     import io
     from IPython.display import display
     import matplotlib.pyplot as plt
-    from vega_datasets import data
     import streamlit as st
     from streamlit.logger import get_logger
     import panel as pn
