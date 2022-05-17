@@ -11,3 +11,4 @@ folium
 geopy
 streamlit-folium
 geopandas
+pandas-profiling
