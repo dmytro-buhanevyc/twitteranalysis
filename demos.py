@@ -189,7 +189,7 @@ def data_frame_demo():
     import matplotlib.pyplot as plt
     import streamlit as st
     from streamlit.logger import get_logger
-
+    
     #NAME OF THE PAGE
     import sys
     sys.path.insert(1, r'C:\Users\dbukhanevych\Anaconda3\envs\TCA\hello')
@@ -201,8 +201,9 @@ def data_frame_demo():
 
     #IMPORTING DATASET
 
-    url="https://github.com/dmytro-buhanevyc/twitteranalysis/blob/main/french_ukraine.csv"
-    twittertest_full=pd.read_csv(r'url')
+    url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/french_ukraine.csv"
+    s=requests.get(url).content
+    twittertest_full=pd.read_csv(io.StringIO(s.decode('utf-8')))
 
 
     #twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
