@@ -250,7 +250,7 @@ def data_frame_demo():
                             fields=['AuthorName'], nearest=True)
 
 
-    twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
+    #twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
     twittertest_full['Date'] = pd.to_datetime(twittertest_full['Date']).dt.normalize()
     twittertest_full.columns = twittertest_full.columns.str.replace(' ', '')
     twittertest_full = twittertest_full[~(twittertest_full['Date'] < '2022-04-22')]
