@@ -189,7 +189,6 @@ def data_frame_demo():
     import matplotlib.pyplot as plt
     import streamlit as st
     from streamlit.logger import get_logger
-    import panel as pn
 
     #NAME OF THE PAGE
     import sys
