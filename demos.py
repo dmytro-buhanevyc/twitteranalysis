@@ -202,7 +202,7 @@ def data_frame_demo():
     #IMPORTING DATASET
 
     url="https://github.com/dmytro-buhanevyc/twitteranalysis/blob/main/french_ukraine.csv"
-    twittertest_full=pd.read_csv(url)
+    twittertest_full=pd.read_csv(r'url')
 
 
     #twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
