@@ -42,6 +42,7 @@ def intro():
 
         ### FAQ
 
+        - Switch to Light scheme by going to the drop down menu on the right > Settings > Theme > Light
         - Add disclaimer
         - Add instructions on how to navigate, extract data
 
