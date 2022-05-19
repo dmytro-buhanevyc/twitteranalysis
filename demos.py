@@ -47,7 +47,7 @@ def intro():
 
 
         ### Contact
-        - Please contact dbukhanevych@transformua.com for more details
+        - Please contact namesurname@transformua.com for more details
     """
     )
 
@@ -203,25 +203,17 @@ def data_frame_demo():
 
     url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/french_ukraine.csv"
     s=requests.get(url).content
-    twittertest_full=pd.read_csv(io.StringIO(s.decode('utf-8')))
+    france_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
 
 
-    #twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
+    france_news['Date'] = pd.to_datetime(france_news['Date']).dt.normalize()
 
+    france_news.columns = france_news.columns.str.replace(' ', '')
 
-    #NORMALIZING
-    twittertest_full['Date'] = pd.to_datetime(twittertest_full['Date']).dt.normalize()
-
-    twittertest_full.columns = twittertest_full.columns.str.replace(' ', '')
-
-    #edit date
-
-    twittertest_full = twittertest_full[~(twittertest_full['Date'] < '2022-04-22')]
-
-
+    france_news = france_news[~(france_news['Date'] < '2022-04-22')]
 
     #GROUPING#
-    counted = twittertest_full.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount']).size().to_frame('Count').reset_index()
+    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount']).size().to_frame('Count').reset_index()
     newdate = counted.set_index('AuthorName', drop=False)
 
 
@@ -250,15 +242,12 @@ def data_frame_demo():
                             fields=['AuthorName'], nearest=True)
 
 
-    #twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
-    twittertest_full['Date'] = pd.to_datetime(twittertest_full['Date']).dt.normalize()
-    twittertest_full.columns = twittertest_full.columns.str.replace(' ', '')
-    twittertest_full = twittertest_full[~(twittertest_full['Date'] < '2022-04-22')]
+    #france_news = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
 
 
     from urllib.error import URLError
 
-    counted = twittertest_full.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
+    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
     newdate2 = counted.set_index('AuthorName', drop=False)
 
     print(newdate2)
@@ -322,12 +311,30 @@ def data_frame_demo():
 
             st.write("#### Tweets", newdate2) #this creates the table
 
-            b=alt.Chart(newdate2).mark_bar(size=3).encode(
-        x = 'Date',
-        y = 'Count',
-        color = 'AuthorName'
-    )
+#
+            fig=px.scatter(newdate2, x="NumberofLikes", y="NumberofRetweets", 
+            size="NumberofLikes", color="AuthorName", color_discrete_sequence=px.colors.qualitative.Bold, 
+            custom_data=["AuthorName", 'NumberofLikes', 'Date', 'Content'],
+                log_x=True, size_max=20)
+
+            fig.update_traces(
+            hovertemplate="<br>".join([
+            "Likes: %{customdata[1]}",
+            "Date: %{customdata[2]}",
             
+            #"Content: %{customdata[3]}",
+
+        ])
+    )
+            fig.update_layout(width = 800, height = 450,
+            title="Tweets' Popularity",
+            xaxis_title="Likes",
+            yaxis_title="Retweets",
+            legend_title="Media Source",)
+
+
+            st.plotly_chart(fig, use_container_width=False)
+
 
             #st.altair_chart(b, use_container_width=True)
     except URLError as e:
@@ -339,6 +346,7 @@ def data_frame_demo():
         """
             % e.reason
         )
+
 
 
 
