@@ -328,12 +328,24 @@ def data_frame_demo():
         ])
     )
             fig.update_layout(width = 800, height = 450,
-            title="Tweets' Popularity",
-            xaxis_title="Likes",
+            title = "French news analysis <br><sup>Based on 8000 latest tweets from all outlets</sup>",         xaxis_title="Likes",
             yaxis_title="Retweets",
             legend_title="Media Source",)
-
-
+            today = date.today()
+            fig.add_annotation(
+                text = (f"TCA | {today}<br>Source: TCA")
+                , showarrow=False
+                , x = 0
+                , y = -0.15
+                , xref='paper'
+                , yref='paper' 
+                , xanchor='left'
+                , yanchor='bottom'
+                , xshift=-1
+                , yshift=-5
+                , font=dict(size=10, color="lightgrey")
+                , align="left"
+                ,)
             st.plotly_chart(fig, use_container_width=False)
 
 
