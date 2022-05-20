@@ -217,9 +217,6 @@ def data_frame_demo():
     st.write("# TCA Data Lab 🧪")
     
     #IMPORTING DATASET
-    twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
-    germany_news = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\germany_news.csv')
-    italy_news = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\italy_news.csv')
 
     global_news = pd.concat([france_news, germany_news, italy_news], keys=['France', 'Germany', 'Italy']).reset_index()
 
