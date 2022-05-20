@@ -203,15 +203,15 @@ def data_frame_demo():
     #IMPORTING DATASET
 #French
     url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/french_ukraine.csv"
-    a=requests.get(url).content
+    s=requests.get(url).content
     france_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
 #German
     url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/germany_news.csv"
-    b=requests.get(url).content
+    s=requests.get(url).content
     germany_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
 #German
     url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/italy_news.csv"
-    c=requests.get(url).content
+    s=requests.get(url).content
     italy_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
     
     st.write("# TCA Data Lab 🧪")
