@@ -331,7 +331,7 @@ def data_frame_demo():
             hovertemplate="<br>".join([
             "Likes: %{customdata[1]}",
             "Date: %{customdata[2]}",
-            "Content: %{customdata[3]}",
+            #"Content: %{customdata[3]}",
 
         ])
     )
