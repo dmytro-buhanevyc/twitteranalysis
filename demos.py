@@ -18,7 +18,7 @@ import branca.colormap as cm
 import tweepy
 import time
 from datetime import date, datetime
-from ipywidgets import interactive
+from ipywidgets import interactive, HBox, VBox
 import inspect
 import textwrap
 from collections import OrderedDict
@@ -201,33 +201,52 @@ def data_frame_demo():
 
 
     #IMPORTING DATASET
-
+#French
     url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/french_ukraine.csv"
-    s=requests.get(url).content
+    a=requests.get(url).content
     france_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
+#German
+    url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/germany_news.csv"
+    b=requests.get(url).content
+    germany_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
+#German
+    url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/italy_news.csv"
+    c=requests.get(url).content
+    italy_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
+    
+    st.write("# TCA Data Lab 🧪")
+    
+    #IMPORTING DATASET
+    twittertest_full = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
+    germany_news = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\germany_news.csv')
+    italy_news = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\italy_news.csv')
+
+    global_news = pd.concat([france_news, germany_news, italy_news], keys=['France', 'Germany', 'Italy']).reset_index()
 
 
-    france_news['Date'] = pd.to_datetime(france_news['Date']).dt.normalize()
 
-    france_news.columns = france_news.columns.str.replace(' ', '')
+    global_news['Date'] = pd.to_datetime(global_news['Date']).dt.normalize()
+    global_news.columns = global_news.columns.str.replace(' ', '')
 
-    france_news = france_news[~(france_news['Date'] < '2022-04-22')]
+    global_news_grouped = global_news.groupby(['level_0', 'Date']).size().to_frame('Count').reset_index()
 
-    #GROUPING#
-    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount']).size().to_frame('Count').reset_index()
+    global_news_grouped = global_news_grouped[~(global_news_grouped['Date'] < '2022-04-22')]
+
+
+    print(global_news)
+    print(global_news['level_0'].unique())
+
+
+    #OLD#
+
+    twittertest_full['Date'] = pd.to_datetime(twittertest_full['Date']).dt.normalize()
+    twittertest_full.columns = twittertest_full.columns.str.replace(' ', '')
+    twittertest_full = twittertest_full[~(twittertest_full['Date'] < '2022-04-22')]
+    counted = twittertest_full.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount']).size().to_frame('Count').reset_index()
     newdate = counted.set_index('AuthorName', drop=False)
 
-
-
-
-    expander = st.expander("How it's done")
-    expander.write("""
-        The news analysis is operationalized through the outlets' respective Twitter accounts' activity. 
-        The media lists are based on open-source data on the largest official news outlets by country. 
-        The data comes from a selection of 1000 latest tweets from each news account. 
-        Further, the data is processed to exclude retweets and a subset 
-        of tweets containing the word 'Ukraine' is selected.
-    """)
+    counted = twittertest_full.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
+    newdate2 = counted.set_index('AuthorName', drop=False)
 
 
 
@@ -242,53 +261,43 @@ def data_frame_demo():
     highlight = alt.selection(type='single', on='mouseover', 
                             fields=['AuthorName'], nearest=True)
 
-
-    #france_news = pd.read_csv(r'C:\Users\dbukhanevych\Downloads\french_ukraine.csv')
-
-
-    from urllib.error import URLError
-
-    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
-    newdate2 = counted.set_index('AuthorName', drop=False)
-
-    print(newdate2)
-
-    selection = alt.selection_multi(on='click', fields=['AuthorName'], bind='legend', empty='all')
+    selection = alt.selection_multi(on='click', fields=['level_0'], bind='legend', empty='all')
     tooltips2 = (
-    alt.Chart(newdate)
+    alt.Chart(global_news_grouped)
     .mark_circle(size=60)
     .encode(
     x="yearmonthdate(Date)",
     y="Count",
-    color="AuthorName",
+    color="level_0", 
     opacity=alt.condition(hover, alt.value(0.5), alt.value(0)),
     tooltip=[
         alt.Tooltip("Date", title="Date"),
         alt.Tooltip("Count", title="Tweets"),
-        alt.Tooltip("AuthorName", title="Media"),
-        alt.Tooltip("AuthorFollowersCount", title="Followers"),
+        alt.Tooltip("level_0", title="Country"),
 
     ],
     )
     .add_selection(hover)
     )
-#- Title goes here
+
+    st.write("#### Ukraine in the news")
+    st.write("This graph shows mentions of 'Ukraine' in the French news media in their 1000 latest tweets.")
+
 
     chart = (
-        alt.Chart(newdate, width=750,
+        alt.Chart(global_news_grouped, width=750,
         height=350)
-        .mark_area(opacity=0.3)
+        .mark_area(opacity=0.2)
         .encode(
             x=alt.X("yearmonthdate(Date)", title="Date"),
             y=alt.Y("Count:Q", stack=None),
-            color="AuthorName:N",
+            color="level_0:N",
             opacity=alt.condition(selection, alt.value(0.5), alt.value(0.1))
         ).add_selection(
     selection
     )
     ).interactive()
-
-    st.altair_chart(chart + tooltips2, use_container_width=False)
+    st.altair_chart(chart +tooltips2, use_container_width=True)
     st.button("Reset")
 
 
@@ -296,39 +305,41 @@ def data_frame_demo():
 
     #INSERTINGTABLE AND SELECTIONS
 
+    counted_global = global_news.groupby(['Date', 'level_0', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
+    global_news = counted_global.set_index('level_0', drop=False)
+    global_news = counted_global.set_index('level_0', drop=False)
+    #global_news.style.set_precision(1)
+
     def showtable():
-        newdate2.drop(columns=['Author'], axis=1, inplace=True)
-        return newdate2.set_index("AuthorName")
+        return global_news.set_index("level_0")
 
     try:
         df = showtable()
         media2 = st.multiselect(
-                "View in table", list(newdate2.index.unique())
+                "View by country", list(global_news.index.unique())
         )        
         if not media2:
             st.write()
         else:
-            newdate2 = newdate2.loc[media2]
+            global_news = global_news.loc[media2]
 
-            st.write("#### Tweets", newdate2) #this creates the table
+            st.write("#### Tweets", global_news) #this creates the table
 
-#
-            fig=px.scatter(newdate2, x="NumberofLikes", y="NumberofRetweets", 
+    #
+            fig=px.scatter(global_news, x="NumberofLikes", y="NumberofRetweets", 
             size="NumberofLikes", color="AuthorName", color_discrete_sequence=px.colors.qualitative.Bold, 
             custom_data=["AuthorName", 'NumberofLikes', 'Date', 'Content'],
                 log_x=True, size_max=20)
-
             fig.update_traces(
             hovertemplate="<br>".join([
             "Likes: %{customdata[1]}",
             "Date: %{customdata[2]}",
-            
-            #"Content: %{customdata[3]}",
+            "Content: %{customdata[3]}",
 
         ])
     )
             fig.update_layout(width = 800, height = 450,
-            title = "French news analysis <br><sup>Based on 8000 latest tweets from all outlets</sup>",         xaxis_title="Likes",
+            title = "Mentions of Ukraine <br><sup>Based on a thousand latest tweets from each outlet</sup>",         xaxis_title="Likes",
             yaxis_title="Retweets",
             legend_title="Media Source",)
             today = date.today()
@@ -359,6 +370,7 @@ def data_frame_demo():
         """
             % e.reason
         )
+
 
 
 
