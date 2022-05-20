@@ -236,13 +236,13 @@ def data_frame_demo():
 
     #OLD#
 
-    twittertest_full['Date'] = pd.to_datetime(twittertest_full['Date']).dt.normalize()
-    twittertest_full.columns = twittertest_full.columns.str.replace(' ', '')
-    twittertest_full = twittertest_full[~(twittertest_full['Date'] < '2022-04-22')]
-    counted = twittertest_full.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount']).size().to_frame('Count').reset_index()
+    france_news['Date'] = pd.to_datetime(france_news['Date']).dt.normalize()
+    france_news.columns = france_news.columns.str.replace(' ', '')
+    france_news = france_news[~(france_news['Date'] < '2022-04-22')]
+    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount']).size().to_frame('Count').reset_index()
     newdate = counted.set_index('AuthorName', drop=False)
 
-    counted = twittertest_full.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
+    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
     newdate2 = counted.set_index('AuthorName', drop=False)
 
 
