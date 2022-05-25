@@ -223,27 +223,15 @@ def data_frame_demo():
 
 
     global_news['Date'] = pd.to_datetime(global_news['Date']).dt.normalize()
+
     global_news.columns = global_news.columns.str.replace(' ', '')
 
     global_news_grouped = global_news.groupby(['level_0', 'Date']).size().to_frame('Count').reset_index()
 
-    global_news_grouped = global_news_grouped[~(global_news_grouped['Date'] < '2022-04-22')]
-
-
-    print(global_news)
-    print(global_news['level_0'].unique())
+    global_news_grouped = global_news_grouped[~(global_news_grouped['Date'] < '2022-05-01')]
 
 
     #OLD#
-
-    france_news['Date'] = pd.to_datetime(france_news['Date']).dt.normalize()
-    france_news.columns = france_news.columns.str.replace(' ', '')
-    france_news = france_news[~(france_news['Date'] < '2022-04-22')]
-    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount']).size().to_frame('Count').reset_index()
-    newdate = counted.set_index('AuthorName', drop=False)
-
-    counted = france_news.groupby(['Date', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
-    newdate2 = counted.set_index('AuthorName', drop=False)
 
 
 
@@ -278,7 +266,7 @@ def data_frame_demo():
     )
 
     st.write("#### Ukraine in the news")
-    st.write("This graph shows mentions of 'Ukraine' in the French news media in their 1000 latest tweets.")
+    st.write("Graph below shows the total distribution of tweets regarding Ukraine from the biggest ffocial news accounts in the respective countries.")
 
 
     chart = (
@@ -302,11 +290,15 @@ def data_frame_demo():
 
     #INSERTINGTABLE AND SELECTIONS
 
-    counted_global = global_news.groupby(['Date', 'level_0', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
+
+
+    counted_global = global_news.groupby(['Date', 'level_0', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets']).size().to_frame('Count').reset_index()
     global_news = counted_global.set_index('level_0', drop=False)
     global_news = counted_global.set_index('level_0', drop=False)
     global_news.Content = global_news.Content.str.wrap(60)
     global_news.Content = global_news.Content.apply(lambda x: x.replace('\n', '<br>'))
+
+
 
     def showtable():
         return global_news.set_index("level_0")
@@ -320,24 +312,22 @@ def data_frame_demo():
             st.write()
         else:
             global_news = global_news.loc[media2]
-            global_news_short = global_news.drop(columns = ['compound', 'pos', 'neg', 'neu', 'Emotion', 'Count', 'level_0', 'Author'])
-
-            st.write("#### Tweets", global_news_short) #this creates the table
-    #
+            global_news_short = global_news.drop(columns = [ 'Count', 'level_0', 'Author'])
+            st.write("####  ", global_news_short) #this creates the table
             fig=px.scatter(global_news, x="NumberofLikes", y="NumberofRetweets", 
             size="NumberofLikes", color="AuthorName", color_discrete_sequence=px.colors.qualitative.Bold, 
             custom_data=["AuthorName", 'NumberofLikes', 'Date', 'Content'],
-                log_x=True, size_max=20)
+                log_x=False, size_max=30)
             fig.update_traces(
             hovertemplate="<br>".join([
-            #"Name: %{customdata[0]}",
+            "Name: %{customdata[0]}",
             "Likes: %{customdata[1]}",
             "Date: %{customdata[2]}",
             "Content: %{customdata[3]}",
             
         ])
     )
-            fig.update_layout(width = 900, height = 450,
+            fig.update_layout(width = 900, height = 550,
             title = "Ukraine in the news <br><sup>Based on latest tweets from each outlet</sup>",         xaxis_title="Likes",
             yaxis_title="Retweets",
             legend_title="Media Source",)
@@ -359,7 +349,6 @@ def data_frame_demo():
 
             st.plotly_chart(fig, use_container_width=False)
 
-
             #st.altair_chart(b, use_container_width=True)
     except URLError as e:
         st.error(
@@ -370,7 +359,6 @@ def data_frame_demo():
         """
             % e.reason
         )
-
 
 
 
