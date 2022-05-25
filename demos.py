@@ -202,7 +202,7 @@ def data_frame_demo():
 
     #IMPORTING DATASET
 #French
-    url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/french_ukraine.csv"
+    url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/france_news.csv"
     s=requests.get(url).content
     france_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
 #German
