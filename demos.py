@@ -305,7 +305,8 @@ def data_frame_demo():
     counted_global = global_news.groupby(['Date', 'level_0', 'Author', 'AuthorName', 'AuthorFollowersCount', 'Content', 'NumberofLikes', 'NumberofRetweets','pos', 'neg', 'neu', 'compound', 'Emotion']).size().to_frame('Count').reset_index()
     global_news = counted_global.set_index('level_0', drop=False)
     global_news = counted_global.set_index('level_0', drop=False)
-    #global_news.style.set_precision(1)
+    global_news.Content = global_news.Content.str.wrap(60)
+    global_news.Content = global_news.Content.apply(lambda x: x.replace('\n', '<br>'))
 
     def showtable():
         return global_news.set_index("level_0")
@@ -319,9 +320,9 @@ def data_frame_demo():
             st.write()
         else:
             global_news = global_news.loc[media2]
+            global_news_short = global_news.drop(columns = ['compound', 'pos', 'neg', 'neu', 'Emotion', 'Count', 'level_0', 'Author'])
 
-            st.write("#### Tweets", global_news) #this creates the table
-
+            st.write("#### Tweets", global_news_short) #this creates the table
     #
             fig=px.scatter(global_news, x="NumberofLikes", y="NumberofRetweets", 
             size="NumberofLikes", color="AuthorName", color_discrete_sequence=px.colors.qualitative.Bold, 
@@ -329,14 +330,15 @@ def data_frame_demo():
                 log_x=True, size_max=20)
             fig.update_traces(
             hovertemplate="<br>".join([
+            #"Name: %{customdata[0]}",
             "Likes: %{customdata[1]}",
             "Date: %{customdata[2]}",
-            #"Content: %{customdata[3]}",
-
+            "Content: %{customdata[3]}",
+            
         ])
     )
-            fig.update_layout(width = 800, height = 450,
-            title = "Mentions of Ukraine <br><sup>Based on a thousand latest tweets from each outlet</sup>",         xaxis_title="Likes",
+            fig.update_layout(width = 900, height = 450,
+            title = "Ukraine in the news <br><sup>Based on latest tweets from each outlet</sup>",         xaxis_title="Likes",
             yaxis_title="Retweets",
             legend_title="Media Source",)
             today = date.today()
@@ -354,6 +356,7 @@ def data_frame_demo():
                 , font=dict(size=10, color="lightgrey")
                 , align="left"
                 ,)
+
             st.plotly_chart(fig, use_container_width=False)
 
 
