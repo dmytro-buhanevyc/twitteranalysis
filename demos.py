@@ -25,9 +25,9 @@ from collections import OrderedDict
 import io
 from IPython.display import display
 import matplotlib.pyplot as plt
-
+import requests
 from typing import Any
-
+from urllib.request import urlopen
 
 def intro():
     import streamlit as st
@@ -42,9 +42,12 @@ def intro():
 
         ### FAQ
 
-        - Switch to Light scheme by going to the drop down menu on the right > Settings > Theme > Light
-        - Add disclaimer
-        - Add instructions on how to navigate, extract data
+        - This TCA Data Lab demo currently hosts two complete projects.
+        - The complete projects are News Analysis and Mapping.
+            - News Analysis visualizes Twitter data from official news sources in three select countries (France, Germany, Italy).
+            - Mapping showcases geospatial data on the number of internally displaced persons in Ukraine.
+            - Animation Demo is a placeholder for potential visualizations of TCA's research. 
+        - Data (table contents, snapshots of graphs) can be extracted as images. 
 
 
         ### Contact
@@ -57,80 +60,98 @@ def intro():
 # compact code.
 # fmt: off
 def mapping_demo():
-    import streamlit as st
-    import pandas as pd
-    import pydeck as pdk
+    st.write("Currently, one data layer is present in the project, which represents the preliminary number (as of 25.03.2022) of internally displaced persons in Ukraine")
+    url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/IDP/IDP_data.csv"
+    s=requests.get(url).content
+    data_all=pd.read_csv(io.StringIO(s.decode('utf-8')))
 
-    from urllib.error import URLError
+    with urlopen(r'https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/IDP/stanford-gg870xt4706-geojson.json') as f:
+        data_geo = json.load(f)
 
-    @st.cache
-    def from_data_file(filename):
-        url = (
-            "http://raw.githubusercontent.com/streamlit/"
-            "example-data/master/hello/v1/%s" % filename)
-        return pd.read_json(url)
+    #with urlopen('https://raw.githubusercontent.com/org-scn-design-studio-community/sdkcommunitymaps/master/geojson/Europe/Ukraine-regions.json') as response:
+    #    data_geo = json.load(response)
 
-    try:
-        ALL_LAYERS = {
-            "Bike Rentals": pdk.Layer(
-                "HexagonLayer",
-                data=from_data_file("bike_rental_stats.json"),
-                get_position=["lon", "lat"],
-                radius=200,
-                elevation_scale=4,
-                elevation_range=[0, 1000],
-                extruded=True,
-            ),
-            "Bart Stop Exits": pdk.Layer(
-                "ScatterplotLayer",
-                data=from_data_file("bart_stop_stats.json"),
-                get_position=["lon", "lat"],
-                get_color=[200, 30, 0, 160],
-                get_radius="[exits]",
-                radius_scale=0.05,
-            ),
-            "Bart Stop Names": pdk.Layer(
-                "TextLayer",
-                data=from_data_file("bart_stop_stats.json"),
-                get_position=["lon", "lat"],
-                get_text="name",
-                get_color=[0, 0, 0, 200],
-                get_size=15,
-                get_alignment_baseline="'bottom'",
-            ),
-            "Outbound Flow": pdk.Layer(
-                "ArcLayer",
-                data=from_data_file("bart_path_stats.json"),
-                get_source_position=["lon", "lat"],
-                get_target_position=["lon2", "lat2"],
-                get_source_color=[200, 30, 0, 160],
-                get_target_color=[200, 30, 0, 160],
-                auto_highlight=True,
-                width_scale=0.0001,
-                get_width="outbound",
-                width_min_pixels=3,
-                width_max_pixels=30,
-            ),
-        }
-        st.sidebar.markdown('### Map Layers')
-        selected_layers = [
-            layer for layer_name, layer in ALL_LAYERS.items()
-            if st.sidebar.checkbox(layer_name, True)]
-        if selected_layers:
-            st.pydeck_chart(pdk.Deck(
-                map_style="mapbox://styles/mapbox/light-v9",
-                initial_view_state={"latitude": 37.76,
-                                    "longitude": -122.4, "zoom": 11, "pitch": 50},
-                layers=selected_layers,
-            ))
-        else:
-            st.error("Please choose at least one layer above.")
-    except URLError as e:
-        st.error("""
-            **This demo requires internet access.**
+    #data_geo = json.load(open('Kecamatan_Surabaya.geojson'))
+    #data_all["IDPs"] = pd.to_numeric(data_all['IDPs'], errors='coerce')
+    #data_all["IDPs"]  = data_all["IDPs"] .astype(int)
 
-            Connection error: %s
-        """ % e.reason)
+    data_all["IDPs"] = data_all["IDPs"].apply(pd.to_numeric)
+
+
+    #data_all['IDPs'] = data_all['IDPs'].astype('Int64')
+
+
+    def center():
+        address = 'Ukraine'
+        geolocator = Nominatim(user_agent="id_explorer")
+        location = geolocator.geocode(address)
+        latitude = location.latitude
+        longitude = location.longitude
+        return latitude, longitude
+
+    def threshold(data):
+
+        threshold_scale = np.linspace(data_all[dicts[data]].min(),
+                                data_all[dicts[data]].max(),
+                                5, dtype=float)
+        threshold_scale = threshold_scale.tolist() # change the numpy array to a list
+        threshold_scale[-1] = threshold_scale[-1]
+        return threshold_scale
+
+
+    def show_maps(data, threshold_scale):
+        maps= folium.Choropleth(
+            geo_data = data_geo,
+            data = data_all,
+            columns=['Region', dicts[data]],
+            key_on='feature.properties.name_1',
+            #threshold_scale=threshold_scale,
+            fill_color='YlGnBu', 
+            fill_opacity=0.7, 
+            line_opacity=0.2,
+            legend_name=dicts[data],
+            highlight=True,
+            smooth_factor=0,
+            overlay=True,
+            nan_fill_color='black', nan_fill_opacity=None, 
+            bins = [0, 20000, 50000, 100000, 200000, 300000],
+            reset=True).add_to(map_sby)
+
+
+        folium.LayerControl().add_to(map_sby)
+        maps.geojson.add_child(folium.features.GeoJsonTooltip(fields=['name_1',data],
+                                                            aliases=['name_1: ', dicts[data]],
+                                                            labels=True))                                                       
+        folium_static(map_sby)
+
+    centers = center()
+
+
+    select_maps = st.sidebar.selectbox(
+        "What data do you want to see?",
+        ("cartodbpositron","OpenStreetMap", "Stamen Toner")
+    )
+    select_data = st.sidebar.radio(
+        "What data do you want to see?",
+        ("Total_IDPs", "LastUpdated")
+    )
+
+    map_sby = folium.Map(tiles=select_maps,  location=[centers[0], centers[1]], zoom_start=5)
+
+    data_all['Region'] = data_all['Region'].str.title()
+    #data_all = data_all.replace({'Region':'Pabean Cantikan'},'Pabean Cantian')
+    #data_all = data_all.replace({'Region':'Karangpilang'},'Karang Pilang')
+
+    dicts = {"Total_IDPs":'IDPs',
+    "LastUpdated": 'LastUpdated',  
+            }
+
+    for idx in range(27):
+        data_geo['features'][idx]['properties']['Total_IDPs'] = int(data_all['IDPs'][idx])
+        data_geo['features'][idx]['properties']['LastUpdated'] = int(data_all['LastUpdated'][idx])
+
+    show_maps(select_data, threshold(select_data))
+
 # fmt: on
 
 # Turn off black formatting for this function to present the user with more
@@ -213,9 +234,7 @@ def data_frame_demo():
     url="https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/italy_news.csv"
     s=requests.get(url).content
     italy_news=pd.read_csv(io.StringIO(s.decode('utf-8')))
-    
-    st.write("# TCA Data Lab 🧪")
-    
+        
     #IMPORTING DATASET
 
     global_news = pd.concat([france_news, germany_news, italy_news], keys=['France', 'Germany', 'Italy']).reset_index()
@@ -266,8 +285,12 @@ def data_frame_demo():
     )
 
     st.write("#### Ukraine in the news")
-    st.write("Graph below shows the total distribution of tweets regarding Ukraine from the biggest ffocial news accounts in the respective countries.")
-
+    expander = st.expander("How it's done")
+    expander.write("""
+     The news sources are selected based on two criteria: 1) They are in top-10 nation-wide media in their countries based on open-source audience estimates;  2) They have an 
+     official Twitter account that is active. Tweets from each news source are extracted via Twitter's Developers API, pre-processed
+     to include only those relating to Ukraine. First graph aggregates the tweets on a country-level, while the table and graph below delve deeper into 
+     specific countries and their news outlets, as well as visualizes engagements that these outlets garner.""")
 
     chart = (
         alt.Chart(global_news_grouped, width=750,

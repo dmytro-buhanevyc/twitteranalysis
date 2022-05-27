@@ -18,7 +18,7 @@ import branca.colormap as cm
 import tweepy
 import time
 from datetime import date, datetime
-from ipywidgets import interactive
+from ipywidgets import interactive, HBox, VBox
 import inspect
 import textwrap
 from collections import OrderedDict
@@ -54,18 +54,15 @@ DEMOS = OrderedDict(
             (
                 demos.fractal_demo,
                 """
-This app provides insight into - to be added
 """,
             ),
         ),
         (
-            "Mapping Demo",
+            "Mapping",
             (
                 demos.mapping_demo,
                 """
-This demo shows how to use
-[`st.pydeck_chart`](https://docs.streamlit.io/library/api-reference/charts/st.pydeck_chart)
-to display geospatial data.
+This demo shows geospatial data collected, analyzed or visualized by TCA.
 """,
             ),
         ),
