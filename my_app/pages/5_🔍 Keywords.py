@@ -81,5 +81,8 @@ progress_bar = st.sidebar.progress(0)
 # We clear elements by calling empty on them.
 progress_bar.empty()
 
-p = open("german_keywords.html")
-components.html(p.read())
+
+HtmlFile = open("https://raw.githubusercontent.com/dmytro-buhanevyc/twitteranalysis/main/my_app/pages/german_keywords.html", 'r', encoding='utf-8')
+source_code = HtmlFile.read() 
+print(source_code)
+components.html(source_code)
